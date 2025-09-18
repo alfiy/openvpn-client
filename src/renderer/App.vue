@@ -2,7 +2,10 @@
   <div class="app">
     <header>
       <h1>OpenVPN Vue Client</h1>
-      <div>Status: <b>{{ status }}</b></div>
+      <div>
+        <span>Status: <b>{{ status }}</b></span>
+        <span v-if="currentUser" style="margin-left:12px">User: <b>{{ currentUser.displayName || currentUser.username }}</b></span>
+      </div>
     </header>
     <main>
       <aside>
@@ -34,6 +37,15 @@ const configs = ref([])
 const logs = ref([])
 const status = ref('idle')
 const mgmtInfo = ref('')
+const currentUser = ref(null)
+
+// 监听来自 Login 组件发的全局事件（简单方式）
+window.addEventListener('login-success', (e) => {
+  currentUser.value = e.detail
+})
+window.addEventListener('logout', () => {
+  currentUser.value = null
+})
 
 // 组件挂载后执行的初始化操作
 onMounted(() => {
@@ -60,7 +72,7 @@ onMounted(() => {
   loadConfigs()
 })
 
-// 初始加载配置文件列表
+// 导入/加载/启动/停止 等函数
 async function importConfig() {
   const res = await window.electronAPI.importConfig()
   if (!res.canceled) loadConfigs()      // 如果用户未取消，则刷新配置列表
@@ -82,3 +94,13 @@ async function stopVPN() {
   await window.electronAPI.stopOpenVPN()
 }
 </script>
+
+<style>
+/* 维持原有样式 */
+body { margin:0; font-family:sans-serif; }
+header { background:#0f172a; color:#fff; padding:10px; display:flex; justify-content:space-between; }
+main { display:flex; height:calc(100vh - 50px); }
+aside { width:300px; padding:10px; }
+section { flex:1; padding:10px; overflow:auto; }
+.card { background:#f8fafc; margin-bottom:10px; padding:10px; border-radius:6px; }
+</style>

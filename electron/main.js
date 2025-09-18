@@ -4,6 +4,15 @@ const fs = require('fs')
 const { spawn } = require('child_process')
 const net = require('net')
 
+// 启动内置 Express 身份验证服务器
+let authServerInstance = null
+try {
+  const { startAuthServer } = require('./auth')
+  authServerInstance = startAuthServer(34987) // 本地端口，可调整
+} catch (e) {
+  console.warn('Failed to start auth server:', e.message)
+}
+
 //  全局变量与初始化
 let mainWindow
 let openvpnProcess = null
